@@ -11,14 +11,7 @@ def keypress():
 
     import keyboard
 
-<<<<<<< HEAD
     #Think about using audio imput to use controls instead of visual imputs.
-=======
-    #hiii
-    #hellooooo
-    #hi theree
-
->>>>>>> d6ec8bd417100d66dbe8809232f3b11cbe4f59b3
     # put your code here
 
 
