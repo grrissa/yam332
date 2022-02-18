@@ -11,10 +11,9 @@ def keypress():
 
     import keyboard
 
-    #hellooooo
-    #hi theree
-
+    #Think about using audio imput to use controls instead of visual imputs.
     # put your code here
+
 
 
 def trackpad_mouse():
