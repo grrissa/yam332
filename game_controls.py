@@ -3,6 +3,8 @@ import pyautogui
 last_position = (None,None)
 last_dir = ''
 
+#Think about using audio imput to use controls instead of visual imputs.
+
 def keypress():
     ''' 
     Choose any four keys that a user can press to control the game.
@@ -11,8 +13,18 @@ def keypress():
 
     import keyboard
 
-    #Think about using audio imput to use controls instead of visual imputs.
-    # put your code here
+    while not (keyboard.is_pressed("esc")):
+        if keyboard.is_pressed("w"):
+            pyautogui.press('up')
+
+        if keyboard.is_pressed("a"):
+            pyautogui.press('left')
+
+        if keyboard.is_pressed("s"):
+            pyautogui.press('down')
+
+        if keyboard.is_pressed("d"):
+            pyautogui.press('right')
 
 
 
