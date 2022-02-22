@@ -1,4 +1,5 @@
 import pyautogui
+import keyboard
 
 last_position = (None,None)
 last_dir = ''
@@ -10,8 +11,6 @@ def keypress():
     Choose any four keys that a user can press to control the game.
     Update this doc string with your choices. 
     '''
-
-    import keyboard
 
     while not (keyboard.is_pressed("esc")):
         if keyboard.is_pressed("w"):
@@ -36,9 +35,41 @@ def trackpad_mouse():
     from pynput import mouse
 
     def on_move(x, y):
-        # put your code here
-        pass
         
+        global last_position
+        global last_dir
+        threshold = 15
+        last_x, last_y = last_position
+
+        while not (keyboard.is_pressed("esc")):
+            if last_x == None or last_y == None:
+                last_position = x, y
+            else:
+                if abs(last_x - x) >= threshold:
+                    if last_x - x < 0:
+                        if last_dir != 'right':
+                            #pyautogui.press('right')
+                            print('right')
+                            last_dir = 'right'
+                    else:
+                        if last_dir != 'left':
+                            #pyautogui.press('left')
+                            print("left")
+                            last_dir = 'left'
+                
+                if abs(last_y - y) >= threshold:
+                    if last_y - y < 0:
+                        if last_dir != 'down':
+                            #pyautogui.press('down')
+                            print('down')
+                            last_dir = "down"
+                    else:
+                        if last_dir != 'up':
+                            #pyautogui.press('up')
+                            print('up')
+                            last_dir = "up"
+        
+  
 
     with mouse.Listener(on_move=on_move) as listener:
         listener.join() 
@@ -99,6 +130,8 @@ def unique_control():
     pass
 
 def main():
+
+
     control_mode = input("How would you like to control the game? ")
     if control_mode == '1':
         keypress()
