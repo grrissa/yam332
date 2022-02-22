@@ -13,16 +13,16 @@ def keypress():
     '''
 
     while not (keyboard.is_pressed("esc")):
-        if keyboard.is_pressed("w"):
+        if keyboard.is_pressed("y"):
             pyautogui.press('up')
 
-        if keyboard.is_pressed("a"):
+        if keyboard.is_pressed("g"):
             pyautogui.press('left')
 
-        if keyboard.is_pressed("s"):
+        if keyboard.is_pressed("h"):
             pyautogui.press('down')
 
-        if keyboard.is_pressed("d"):
+        if keyboard.is_pressed("j"):
             pyautogui.press('right')
 
 
