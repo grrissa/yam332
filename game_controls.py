@@ -38,7 +38,7 @@ def trackpad_mouse():
         
         global last_position
         global last_dir
-        threshold = 15
+        threshold = 1000
         last_x, last_y = last_position
 
         while not (keyboard.is_pressed("esc")):
@@ -83,8 +83,8 @@ def color_tracker():
     import multithreaded_webcam as mw
 
     # You need to define HSV colour range MAKE CHANGE HERE
-    colorLower = None
-    colorUpper = None
+    colorLower = (90,46,53)
+    colorUpper = (153,100,100)
 
     # set the limit for the number of frames to store and the number that have seen direction change
     buffer = 20
@@ -103,7 +103,18 @@ def color_tracker():
 
 
     while True:
-        # your code here
+        frame = vs.read()
+        frame_flip = cv2.flip(frame,1)
+        imutils.resize(frame_flip, width = 600)
+        cv2.GaussianBlur(frame, (5,5), 0)
+        cv2.cvtColor(frame_flip, cv2.COLOR_BGR2HSV)
+
+        mask = cv2.inRange(frame, colorLower, colorUpper)
+        cv2.erode(mask, None, iterations = 2)
+        cv2.dilate(mask, None, iterations = 2)
+
+
+        
         continue
         
 
