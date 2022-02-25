@@ -1,6 +1,6 @@
-from pickle import NEWOBJ_EX
+
 import pyautogui
-import keyboard
+
 
 last_position = (None,None)
 last_dir = ''
@@ -12,6 +12,8 @@ def keypress():
     Choose any four keys that a user can press to control the game.
     Update this doc string with your choices. 
     '''
+
+    import keyboard
 
     while not (keyboard.is_pressed("esc")):
         if keyboard.is_pressed("y"):
@@ -82,6 +84,7 @@ def trackpad_mouse():
         listener.join() 
 
 def color_tracker():
+    
     import cv2
     import imutils
     import numpy as np
@@ -109,7 +112,7 @@ def color_tracker():
     vs = mw.WebcamVideoStream().start()
 
 
-    while not (keyboard.is_pressed("esc")):
+    while True:
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
         resized = imutils.resize(frame, width = 600)
