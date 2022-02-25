@@ -42,37 +42,39 @@ def trackpad_mouse():
         threshold = 30
         last_x, last_y = last_position
 
-        while not (keyboard.is_pressed("esc")):
-            if last_x == None or last_y == None:
-                last_position = x, y
-            else:
-                if abs(last_x - x) >= threshold:
-                    if last_x - x < 0:
-                        if last_dir != 'right':
-                            #pyautogui.press('right')
-                            print('right')
-                            last_dir = 'right'
-                            last_position = x, y
-                    else:
-                        if last_dir != 'left':
-                            #pyautogui.press('left')
-                            print("left")
-                            last_dir = 'left'
-                            last_position = x, y
-                
-                if abs(last_y - y) >= threshold:
-                    if last_y - y < 0:
-                        if last_dir != 'down':
-                            #pyautogui.press('down')
-                            print('down')
-                            last_dir = "down"
-                            last_position = x, y
-                    else:
-                        if last_dir != 'up':
-                            #pyautogui.press('up')
-                            print('up')
-                            last_dir = "up"
-                            last_position = x, y
+    
+
+        if last_x == None or last_y == None:
+            last_position = x, y
+        else:
+            if abs(last_x - x) >= threshold:
+                if last_x - x < 0:
+                    if last_dir != 'right':
+                        #pyautogui.press('right')
+                        print('right')
+                        last_dir = 'right'
+                        last_position = x, y
+                else:
+                    if last_dir != 'left':
+                        #pyautogui.press('left')
+                        print("left")
+                        last_dir = 'left'
+                        last_position = x, y
+            
+            if abs(last_y - y) >= threshold:
+                if last_y - y < 0:
+                    if last_dir != 'down':
+                        #pyautogui.press('down')
+                        print('down')
+                        last_dir = "down"
+                        last_position = x, y
+                else:
+                    if last_dir != 'up':
+                        #pyautogui.press('up')
+                        print('up')
+                        last_dir = "up"
+                        last_position = x, y
+            
         
   
 
@@ -129,6 +131,9 @@ def color_tracker():
             center = (int(M['m10'] / M['m00']), int(M['m01'] / M['m00']))
 
             if radius > 10:
+                cv2.circle(resized, (int(x), int(y)), int(radius), (0,255,255), 2)
+                cv2.circle(resized, center, 5, (0,255,255), -1)
+
                 pts.appendleft(center)
 
         #to find the direction            
@@ -147,7 +152,7 @@ def color_tracker():
                 else:
                     direction = 'down'
 
-            cv2.putText(frame_flip, direction, (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+            cv2.putText(resized, direction, (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
         #setting controls
         if last_dir != 'right' and direction == 'right':
@@ -162,16 +167,16 @@ def color_tracker():
             #pyautogui.press('up')
             print('up')
             last_dir = 'up'
-        else:
+        elif last_dir != 'down' and direction == 'down':
             #pyautogui.press('down')
             print('down')
             last_dir = 'down'
 
-        cv2.imshow('Game Control Window', frame_flip)
+        cv2.imshow('Game Control Window', resized)
         cv2.waitKey(1)
         num_frames += 1
 
-        continue
+    
         
 
 
@@ -198,29 +203,32 @@ def finger_tracking():
     to_draw = mp.solutions.drawing_utils
     global last_dir
 
-    frame = vs.read()
-    frame_flip = cv2.flip(frame,1)
-    resized = imutils.resize(frame, width = 600)
-    blurred = cv2.GaussianBlur(resized, (5,5), 0)
-    final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2RGB)
+    while not (keyboard.is_pressed("esc")):
+        frame = vs.read()
+        frame_flip = cv2.flip(frame,1)
+        resized = imutils.resize(frame, width = 600)
+        blurred = cv2.GaussianBlur(resized, (5,5), 0)
+        final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2RGB)
 
-    # getting results from processing image for our hand
-    results = my_hand.process(final_frame)
+        # getting results from processing image for our hand
+        results = my_hand.process(final_frame)
 
-    num_fingers = 0
-    major_features = []
+        num_fingers = 0
+        major_features = []
 
-    for hand_item in results:
-        hand_item.multi_hand_landmarks
+        for hand_item in results:
+            landmark_list = hand_item.multi_hand_landmarks
 
-        for id, lm in enumerate(hand_item.landmark):
-            (height, width, third) = final_frame.shape
-            new_x = lm.x * width
-            new_y = lm.y * height
-            cv2.circle(final_frame, (new_x, new_y), 3, (255,0,255), cv2.FILLED)
-            major_features.append(id, new_x, new_y)
+            for id, lm in enumerate(hand_item.landmark):
+                (height, width, third) = final_frame.shape
+                new_x = lm.x * width
+                new_y = lm.y * height
+                cv2.circle(final_frame, (new_x, new_y), 3, (255,0,255), cv2.FILLED)
+                major_features.append(id, new_x, new_y)
+        
+        continue
     
-    
+
 
         
 
