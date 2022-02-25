@@ -106,67 +106,62 @@ def color_tracker():
     vs = mw.WebcamVideoStream().start()
 
 
-    while True:
+    while not (keyboard.is_pressed("esc")):
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
-        imutils.resize(frame_flip, width = 600)
-        cv2.GaussianBlur(frame, (5,5), 0)
-        cv2.cvtColor(frame_flip, cv2.COLOR_BGR2HSV)
+        resized = imutils.resize(frame_flip, width = 600)
+        blurred = cv2.GaussianBlur(resized, (5,5), 0)
+        final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        mask1 = cv2.inRange(frame_flip, colorLower, colorUpper)
+        mask1 = cv2.inRange(final_frame, colorLower, colorUpper)
         mask2 = cv2.erode(mask1, None, iterations = 2)
         mask3 = cv2.dilate(mask2, None, iterations = 2)
 
-        list_of_points, item2 = cv2.findContours(mask3.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(mask3.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
+        #finding center
         center = None
+        if len(contours) > 0:
+            largest_contour = max(contours, key = cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(largest_contour)
+            M = cv2.moments(largest_contour)
+            center = (int(M['m10'] / M['m00']), int(M['m01'] / M['m00']))
 
-        largest_contour = max(list_of_points, key = cv2.contourArea)
-        item1, radius = cv2.minEnclosingCircle(largest_contour)
-        M = cv2.moments(largest_contour)
-        center = (int(M['m10'] / M['m00']), int(M['m01'] / M['m00']))
+            if radius > 10:
+                pts.appendleft(center)
 
-        if radius > 10:
-            pts.appendleft(radius)
-            
+        #to find the direction            
         if num_frames > 10 and len(pts) > 10:
             dX, dY = ( pts[0][0]-pts[9][0], (pts[0][1]-pts[9][1] ))
-            threshold = 95
+            threshold = 200
 
-            if dX >= threshold:
+            if abs(dX) >= threshold:
                 if  dX < 0:
-                    if last_dir != 'right':
-                        direction = 'right'
-                        last_dir = 'right'
+                    direction = 'left'
                 else:
-                    if last_dir != 'left':
-                        direction = 'left'
-                        last_dir = 'left'
-            elif dY >= threshold:
+                    direction = 'right'
+            elif abs(dY) >= threshold:
                 if  dY < 0:
-                    if last_dir != 'up':
-                        direction = 'up'
-                        last_dir = 'up'
+                    direction = 'up'
                 else:
-                    if last_dir != 'down':
-                        direction = 'down'
-                        last_dir = 'up'
+                    direction = 'down'
 
             cv2.putText(frame_flip, direction, (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
+        #setting controls
         if last_dir != 'right' and direction == 'right':
             #pyautogui.press('right')
             print("right")
             last_dir = 'right'
-        if last_dir != 'left' and direction == 'left':
+        elif last_dir != 'left' and direction == 'left':
             #pyautogui.press('left')
             print("left")
             last_dir = 'left'
-        if last_dir != 'up' and direction == 'up':
+        elif last_dir != 'up' and direction == 'up':
             #pyautogui.press('up')
             print('up')
             last_dir = 'up'
-        if last_dir != 'down' and direction == 'down':
+        else:
             #pyautogui.press('down')
             print('down')
             last_dir = 'down'
