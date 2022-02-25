@@ -1,6 +1,5 @@
-from pickle import NEWOBJ_EX
+
 import pyautogui
-import keyboard
 
 last_position = (None,None)
 last_dir = ''
@@ -12,6 +11,8 @@ def keypress():
     Choose any four keys that a user can press to control the game.
     Update this doc string with your choices. 
     '''
+
+    import keyboard
 
     while not (keyboard.is_pressed("esc")):
         if keyboard.is_pressed("y"):
@@ -109,7 +110,7 @@ def color_tracker():
     vs = mw.WebcamVideoStream().start()
 
 
-    while not (keyboard.is_pressed("esc")):
+    while True:
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
         resized = imutils.resize(frame, width = 600)
@@ -195,7 +196,7 @@ def finger_tracking():
     vs = mw.WebcamVideoStream().start()
 
     my_hand = mp.solutions.hands
-    my_hand.Hands(static_image_mode=False,
+    accuracy = my_hand.Hands(static_image_mode=False,
                      max_num_hands=1,
                      min_detection_confidence=0.5,
                      min_tracking_confidence=0.5)
@@ -203,30 +204,33 @@ def finger_tracking():
     to_draw = mp.solutions.drawing_utils
     global last_dir
 
-    while not (keyboard.is_pressed("esc")):
+    while True:
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
-        resized = imutils.resize(frame, width = 600)
-        blurred = cv2.GaussianBlur(resized, (5,5), 0)
-        final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2RGB)
+        resized = imutils.resize(frame_flip, width = 600)
+        final_frame = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
 
         # getting results from processing image for our hand
-        results = my_hand.process(final_frame)
+        results = accuracy.process(final_frame)
 
         num_fingers = 0
         major_features = []
 
-        for hand_item in results:
-            landmark_list = hand_item.multi_hand_landmarks
+        if results.multi_hand_landmarks:
+            for hand_item in results.multi_hand_landmarks:
+                
 
-            for id, lm in enumerate(hand_item.landmark):
-                (height, width, third) = final_frame.shape
-                new_x = lm.x * width
-                new_y = lm.y * height
-                cv2.circle(final_frame, (new_x, new_y), 3, (255,0,255), cv2.FILLED)
-                major_features.append(id, new_x, new_y)
+                for id, lm in enumerate(hand_item.landmark):
+                    (height, width, third) = final_frame.shape
+                    new_x = lm.x * width
+                    new_y = lm.y * height
+                    cv2.circle(resized, (new_x, new_y), 3, (255,0,255), cv2.FILLED)
+                    major_features.append((id, new_x, new_y))
+                
+                to_draw.draw_landmarks(resized, hand_item, my_hand.HAND_CONNECTIONS)
+
         
-        continue
+        
     
 
 
