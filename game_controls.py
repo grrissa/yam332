@@ -1,3 +1,4 @@
+from pickle import NEWOBJ_EX
 import pyautogui
 import keyboard
 
@@ -109,7 +110,7 @@ def color_tracker():
     while not (keyboard.is_pressed("esc")):
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
-        resized = imutils.resize(frame_flip, width = 600)
+        resized = imutils.resize(frame, width = 600)
         blurred = cv2.GaussianBlur(resized, (5,5), 0)
         final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
@@ -133,7 +134,7 @@ def color_tracker():
         #to find the direction            
         if num_frames > 10 and len(pts) > 10:
             dX, dY = ( pts[0][0]-pts[9][0], (pts[0][1]-pts[9][1] ))
-            threshold = 200
+            threshold = 100
 
             if abs(dX) >= threshold:
                 if  dX < 0:
@@ -188,7 +189,41 @@ def finger_tracking():
     #Start video capture
     vs = mw.WebcamVideoStream().start()
 
-    # put your code here
+    my_hand = mp.solutions.hands
+    my_hand.Hands(static_image_mode=False,
+                     max_num_hands=1,
+                     min_detection_confidence=0.5,
+                     min_tracking_confidence=0.5)
+
+    to_draw = mp.solutions.drawing_utils
+    global last_dir
+
+    frame = vs.read()
+    frame_flip = cv2.flip(frame,1)
+    resized = imutils.resize(frame, width = 600)
+    blurred = cv2.GaussianBlur(resized, (5,5), 0)
+    final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2RGB)
+
+    # getting results from processing image for our hand
+    results = my_hand.process(final_frame)
+
+    num_fingers = 0
+    major_features = []
+
+    for hand_item in results:
+        hand_item.multi_hand_landmarks
+
+        for id, lm in enumerate(hand_item.landmark):
+            (height, width, third) = final_frame.shape
+            new_x = lm.x * width
+            new_y = lm.y * height
+            cv2.circle(final_frame, (new_x, new_y), 3, (255,0,255), cv2.FILLED)
+            major_features.append(id, new_x, new_y)
+    
+    
+
+        
+
 
 
 def unique_control():
