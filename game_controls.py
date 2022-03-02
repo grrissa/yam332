@@ -28,7 +28,6 @@ def keypress():
             pyautogui.press('right')
 
 
-# FIX ME
 def trackpad_mouse():
     ''' 
     Control the game by moving the mouse/finger on trackpad left, right, up, or down. 
@@ -40,7 +39,7 @@ def trackpad_mouse():
         
         global last_position
         global last_dir
-        threshold = 30
+        threshold = 100
         last_x, last_y = last_position
 
     
@@ -51,28 +50,24 @@ def trackpad_mouse():
             if abs(last_x - x) >= threshold:
                 if last_x - x < 0:
                     if last_dir != 'right':
-                        #pyautogui.press('right')
-                        print('right')
+                        pyautogui.press('right')
                         last_dir = 'right'
                         last_position = x, y
                 else:
                     if last_dir != 'left':
-                        #pyautogui.press('left')
-                        print("left")
+                        pyautogui.press('left')
                         last_dir = 'left'
                         last_position = x, y
             
             if abs(last_y - y) >= threshold:
                 if last_y - y < 0:
                     if last_dir != 'down':
-                        #pyautogui.press('down')
-                        print('down')
+                        pyautogui.press('down')
                         last_dir = "down"
                         last_position = x, y
                 else:
                     if last_dir != 'up':
-                        #pyautogui.press('up')
-                        print('up')
+                        pyautogui.press('up')
                         last_dir = "up"
                         last_position = x, y
             
@@ -92,8 +87,8 @@ def color_tracker():
     import multithreaded_webcam as mw
 
     # You need to define HSV colour range MAKE CHANGE HERE
-    colorLower = (90,65,53)
-    colorUpper = (138,100,100)
+    colorLower = (200,69,60)
+    colorUpper = (240,100,100)
 
     # set the limit for the number of frames to store and the number that have seen direction change
     buffer = 20
@@ -114,7 +109,7 @@ def color_tracker():
     while True:
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
-        resized = imutils.resize(frame, width = 600)
+        resized = imutils.resize(frame_flip, width = 600)
         blurred = cv2.GaussianBlur(resized, (5,5), 0)
         final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
