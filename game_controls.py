@@ -160,20 +160,16 @@ def color_tracker():
 
         #setting controls
         if last_dir != 'right' and direction == 'right':
-            #pyautogui.press('right')
-            print("right")
+            pyautogui.press('right')
             last_dir = 'right'
         elif last_dir != 'left' and direction == 'left':
-            #pyautogui.press('left')
-            print("left")
+            pyautogui.press('left')
             last_dir = 'left'
         elif last_dir != 'up' and direction == 'up':
-            #pyautogui.press('up')
-            print('up')
+            pyautogui.press('up')
             last_dir = 'up'
         elif last_dir != 'down' and direction == 'down':
-            #pyautogui.press('down')
-            print('down')
+            pyautogui.press('down')
             last_dir = 'down'
 
         cv2.imshow('Game Control Window', resized)
@@ -264,20 +260,16 @@ def finger_tracking():
         
         #setting controls
         if last_dir != 'right' and direction == 'right':
-            #pyautogui.press('right')
-            print("right")
+            pyautogui.press('right')
             last_dir = 'right'
         elif last_dir != 'left' and direction == 'left':
-            #pyautogui.press('left')
-            print("left")
+            pyautogui.press('left')
             last_dir = 'left'
         elif last_dir != 'up' and direction == 'up':
-            #pyautogui.press('up')
-            print('up')
+            pyautogui.press('up')
             last_dir = 'up'
         elif last_dir != 'down' and direction == 'down':
-            #pyautogui.press('down')
-            print('down')
+            pyautogui.press('down')
             last_dir = 'down'
 
         cv2.putText(resized,str(int(num_fingers)),(10,70),cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
@@ -371,20 +363,16 @@ def unique_control():
 
         #setting controls
         if last_dir != 'right' and direction == 'right':
-            #pyautogui.press('right')
-            print("right")
+            pyautogui.press('right')
             last_dir = 'right'
         elif last_dir != 'left' and direction == 'left':
-            #pyautogui.press('left')
-            print("left")
+            pyautogui.press('left')
             last_dir = 'left'
         elif last_dir != 'up' and direction == 'up':
-            #pyautogui.press('up')
-            print('up')
+            pyautogui.press('up')
             last_dir = 'up'
         elif last_dir != 'down' and direction == 'down':
-            #pyautogui.press('down')
-            print('down')
+            pyautogui.press('down')
             last_dir = 'down'
 
         cv2.imshow('Game Control Window', resized)
