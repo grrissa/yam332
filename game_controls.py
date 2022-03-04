@@ -86,9 +86,9 @@ def color_tracker():
     import time
     import multithreaded_webcam as mw
 
-    # You need to define HSV colour range MAKE CHANGE HERE
-    colorLower = (200,69,60)
-    colorUpper = (240,100,100)
+    # ISOLATES GREEN/YELLOW COLOR FRAMES
+    colorLower = (29, 86, 6)
+    colorUpper = (64, 255, 255)
 
     # set the limit for the number of frames to store and the number that have seen direction change
     buffer = 20
@@ -172,9 +172,7 @@ def color_tracker():
         cv2.imshow('Game Control Window', resized)
         cv2.waitKey(1)
         num_frames += 1
-
-    
-        
+       
 
 
 
@@ -198,6 +196,7 @@ def finger_tracking():
                      min_tracking_confidence=0.5)
 
     to_draw = mp.solutions.drawing_utils
+    direction = ''
     global last_dir
 
     while True:
@@ -210,7 +209,7 @@ def finger_tracking():
         results = accuracy.process(final_frame)
 
         num_fingers = 0
-        major_features = []
+        landmarkList = []
 
         if results.multi_hand_landmarks:
             for hand_item in results.multi_hand_landmarks:
@@ -218,25 +217,156 @@ def finger_tracking():
 
                 for id, lm in enumerate(hand_item.landmark):
                     (height, width, third) = final_frame.shape
-                    new_x = lm.x * width
-                    new_y = lm.y * height
-                    cv2.circle(resized, (new_x, new_y), 3, (255,0,255), cv2.FILLED)
-                    major_features.append((id, new_x, new_y))
+                    new_x = int(lm.x * width)
+                    new_y = int(lm.y * height)
+                    center = new_x, new_y
+                    cv2.circle(resized, center, 3, (255,0,255), cv2.FILLED)
+                    landmarkList.append((id, new_x, new_y))
                 
                 to_draw.draw_landmarks(resized, hand_item, my_hand.HAND_CONNECTIONS)
 
+        if len(landmarkList) > 0:
+            if landmarkList[4][1] < landmarkList[3][1]:
+                num_fingers += 1
+            if landmarkList[8][2] < landmarkList[6][2]:
+                num_fingers += 1
+            if landmarkList[12][2] < landmarkList[10][2]:
+                num_fingers += 1
+            if landmarkList[16][2] < landmarkList[14][2]:
+                num_fingers += 1
+            if landmarkList[20][2] < landmarkList[18][2]:
+                num_fingers += 1
+            
+            if num_fingers == 1:
+                direction = 'up'
+            elif num_fingers == 2:
+                direction = 'right'
+            elif num_fingers == 3:
+                direction = 'down'
+            elif num_fingers == 5 or num_fingers == 4:
+                direction = 'left'
         
+        #setting controls
+        if last_dir != 'right' and direction == 'right':
+            #pyautogui.press('right')
+            print("right")
+            last_dir = 'right'
+        elif last_dir != 'left' and direction == 'left':
+            #pyautogui.press('left')
+            print("left")
+            last_dir = 'left'
+        elif last_dir != 'up' and direction == 'up':
+            #pyautogui.press('up')
+            print('up')
+            last_dir = 'up'
+        elif last_dir != 'down' and direction == 'down':
+            #pyautogui.press('down')
+            print('down')
+            last_dir = 'down'
         
-    
-
-
-        
+        cv2.putText(resized,str(int(num_fingers)),(10,70),cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
+        cv2.imshow("Image", resized)
+        cv2.waitKey(1)
 
 
 
 def unique_control():
-    # put your code here
-    pass
+    import cv2
+    import imutils
+    import numpy as np
+    import time
+    import multithreaded_webcam as mw
+    import mediapipe as mp
+
+    ##Sleep for 2 seconds to let camera initialize properly
+    time.sleep(2)
+    #Start video capture
+    vs = mw.WebcamVideoStream().start()
+
+    my_hand = mp.solutions.hands
+    accuracy = my_hand.Hands(static_image_mode=False,
+                     max_num_hands=1,
+                     min_detection_confidence=0.5,
+                     min_tracking_confidence=0.5)
+
+    to_draw = mp.solutions.drawing_utils
+
+    (dX, dY) = (0, 0)
+
+    direction = ''
+    global last_dir
+    global last_position
+    last_position = (0,0)
+
+    while True:
+        frame = vs.read()
+        frame_flip = cv2.flip(frame,1)
+        resized = imutils.resize(frame_flip, width = 600)
+        final_frame = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+
+        # getting results from processing image for our hand
+        results = accuracy.process(final_frame)
+
+        landmarkList = []
+
+        # puts landmarks into an array
+        if results.multi_hand_landmarks:
+            for hand_item in results.multi_hand_landmarks:
+                
+
+                for id, lm in enumerate(hand_item.landmark):
+                    (height, width, third) = final_frame.shape
+                    new_x = int(lm.x * width)
+                    new_y = int(lm.y * height)
+                    center = new_x, new_y
+                    cv2.circle(resized, center, 3, (255,0,255), cv2.FILLED)
+                    thing = (id, new_x, new_y)
+                    landmarkList.append(thing)
+                
+                to_draw.draw_landmarks(resized, hand_item, my_hand.HAND_CONNECTIONS)
+        
+        threshold = 100
+        if len(landmarkList) > 0:
+            (id, new_x, new_y) =  landmarkList[8]
+            dX, dY = ( new_x - last_position[0], new_y - last_position[1])
+            threshold = 100
+
+            if abs(dX) >= threshold:
+                if  dX < 0:
+                    direction = 'left'
+                else:
+                    direction = 'right'
+            elif abs(dY) >= threshold:
+                if  dY < 0:
+                    direction = 'up'
+                else:
+                    direction = 'down'
+
+            last_position = (new_x, new_y)
+
+            cv2.putText(resized, direction, (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+
+        #setting controls
+        if last_dir != 'right' and direction == 'right':
+            #pyautogui.press('right')
+            print("right")
+            last_dir = 'right'
+        elif last_dir != 'left' and direction == 'left':
+            #pyautogui.press('left')
+            print("left")
+            last_dir = 'left'
+        elif last_dir != 'up' and direction == 'up':
+            #pyautogui.press('up')
+            print('up')
+            last_dir = 'up'
+        elif last_dir != 'down' and direction == 'down':
+            #pyautogui.press('down')
+            print('down')
+            last_dir = 'down'
+
+        cv2.imshow('Game Control Window', resized)
+        cv2.waitKey(1)
+                                
 
 def main():
 
