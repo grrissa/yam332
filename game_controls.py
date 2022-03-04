@@ -12,8 +12,10 @@ def keypress():
     Update this doc string with your choices. 
     '''
 
+    #imports keyboard library
     import keyboard
 
+    #loops through and changes keys from arrow keys to letter keys
     while not (keyboard.is_pressed("esc")):
         if keyboard.is_pressed("y"):
             pyautogui.press('up')
@@ -42,11 +44,11 @@ def trackpad_mouse():
         threshold = 100
         last_x, last_y = last_position
 
-    
-
+        #updates last position with currrent position
         if last_x == None or last_y == None:
             last_position = x, y
         else:
+            #if the trackpad moves further than the threshold set direction to corresponting input
             if abs(last_x - x) >= threshold:
                 if last_x - x < 0:
                     if last_dir != 'right':
@@ -71,14 +73,15 @@ def trackpad_mouse():
                         last_dir = "up"
                         last_position = x, y
             
-        
-  
-
+    #if finger motion detected, on_move function is called
     with mouse.Listener(on_move=on_move) as listener:
         listener.join() 
 
 def color_tracker():
-    
+    ''' 
+    Control the game by tracking a specific hue of color on front camera directionally.
+    '''
+
     import cv2
     import imutils
     import numpy as np
@@ -105,21 +108,24 @@ def color_tracker():
     #Start video capture
     vs = mw.WebcamVideoStream().start()
 
-
+    
     while True:
+        #creates new frame
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
         resized = imutils.resize(frame_flip, width = 600)
         blurred = cv2.GaussianBlur(resized, (5,5), 0)
         final_frame = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
+        #isolates colored objects
         mask1 = cv2.inRange(final_frame, colorLower, colorUpper)
         mask2 = cv2.erode(mask1, None, iterations = 2)
         mask3 = cv2.dilate(mask2, None, iterations = 2)
 
+        #creates a new contour of object
         contours, hierarchy = cv2.findContours(mask3.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
-        #finding center
+        #finding center of object 
         center = None
         if len(contours) > 0:
             largest_contour = max(contours, key = cv2.contourArea)
@@ -133,7 +139,7 @@ def color_tracker():
 
                 pts.appendleft(center)
 
-        #to find the direction            
+        #if colored object moves further than the threshold then set corresponding direction accordingly 
         if num_frames > 10 and len(pts) > 10:
             dX, dY = ( pts[0][0]-pts[9][0], (pts[0][1]-pts[9][1] ))
             threshold = 100
@@ -149,6 +155,7 @@ def color_tracker():
                 else:
                     direction = 'down'
 
+            #displays directions on frame
             cv2.putText(resized, direction, (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
         #setting controls
@@ -177,6 +184,10 @@ def color_tracker():
 
 
 def finger_tracking():
+    ''' 
+    Control the game by tracking finger placements on hand and assigning directions to specific number of fingers held up.
+    '''
+
     import cv2
     import imutils
     import numpy as np
@@ -189,6 +200,7 @@ def finger_tracking():
     #Start video capture
     vs = mw.WebcamVideoStream().start()
 
+    #sets accuracy for hand tracking
     my_hand = mp.solutions.hands
     accuracy = my_hand.Hands(static_image_mode=False,
                      max_num_hands=1,
@@ -200,6 +212,7 @@ def finger_tracking():
     global last_dir
 
     while True:
+        #creates new frame 
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
         resized = imutils.resize(frame_flip, width = 600)
@@ -208,13 +221,14 @@ def finger_tracking():
         # getting results from processing image for our hand
         results = accuracy.process(final_frame)
 
+        #creates new variables to track number of fingers and landmarks on the hand 
         num_fingers = 0
         landmarkList = []
 
+        #iterates through landmarks and adds to landmark list
         if results.multi_hand_landmarks:
             for hand_item in results.multi_hand_landmarks:
                 
-
                 for id, lm in enumerate(hand_item.landmark):
                     (height, width, third) = final_frame.shape
                     new_x = int(lm.x * width)
@@ -225,6 +239,7 @@ def finger_tracking():
                 
                 to_draw.draw_landmarks(resized, hand_item, my_hand.HAND_CONNECTIONS)
 
+        #counts number of fingers in frame and sets directions accordingly 
         if len(landmarkList) > 0:
             if landmarkList[4][1] < landmarkList[3][1]:
                 num_fingers += 1
@@ -237,6 +252,7 @@ def finger_tracking():
             if landmarkList[20][2] < landmarkList[18][2]:
                 num_fingers += 1
             
+            #sets directions 
             if num_fingers == 1:
                 direction = 'up'
             elif num_fingers == 2:
@@ -263,7 +279,7 @@ def finger_tracking():
             #pyautogui.press('down')
             print('down')
             last_dir = 'down'
-        
+
         cv2.putText(resized,str(int(num_fingers)),(10,70),cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
         cv2.imshow("Image", resized)
         cv2.waitKey(1)
@@ -271,6 +287,10 @@ def finger_tracking():
 
 
 def unique_control():
+    ''' 
+    Control the game by tracking fist across the camera corresponding to the direction of the fist motion.
+    '''
+
     import cv2
     import imutils
     import numpy as np
@@ -283,6 +303,7 @@ def unique_control():
     #Start video capture
     vs = mw.WebcamVideoStream().start()
 
+    #sets hand accuracy 
     my_hand = mp.solutions.hands
     accuracy = my_hand.Hands(static_image_mode=False,
                      max_num_hands=1,
@@ -291,14 +312,15 @@ def unique_control():
 
     to_draw = mp.solutions.drawing_utils
 
-    (dX, dY) = (0, 0)
-
+    #creates position and directions variables
     direction = ''
     global last_dir
     global last_position
     last_position = (0,0)
+    (dX, dY) = (0, 0)
 
     while True:
+        #creates new frames
         frame = vs.read()
         frame_flip = cv2.flip(frame,1)
         resized = imutils.resize(frame_flip, width = 600)
@@ -307,13 +329,12 @@ def unique_control():
         # getting results from processing image for our hand
         results = accuracy.process(final_frame)
 
+        #creates landmark list
         landmarkList = []
 
-        # puts landmarks into an array
+         #iterates through landmarks and adds to landmark list
         if results.multi_hand_landmarks:
             for hand_item in results.multi_hand_landmarks:
-                
-
                 for id, lm in enumerate(hand_item.landmark):
                     (height, width, third) = final_frame.shape
                     new_x = int(lm.x * width)
@@ -325,6 +346,7 @@ def unique_control():
                 
                 to_draw.draw_landmarks(resized, hand_item, my_hand.HAND_CONNECTIONS)
         
+        #calculates change in position and if threshold requirement met, directional inputs set 
         threshold = 100
         if len(landmarkList) > 0:
             (id, new_x, new_y) =  landmarkList[8]
@@ -342,6 +364,7 @@ def unique_control():
                 else:
                     direction = 'down'
 
+            #updates last position to curent position 
             last_position = (new_x, new_y)
 
             cv2.putText(resized, direction, (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
@@ -370,7 +393,7 @@ def unique_control():
 
 def main():
 
-
+    #prompts user to input number depending on which game controls they would like to use
     control_mode = input("How would you like to control the game? ")
     if control_mode == '1':
         keypress()
