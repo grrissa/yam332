@@ -5,7 +5,7 @@ from threading import Thread
 #Class implemeting seperate threading for reading of frames.
 class WebcamVideoStream:
     def __init__(self):
-        self.stream = cv2.VideoCapture(0)
+        self.stream = cv2.VideoCapture(1)
         self.ret, self.frame = self.stream.read()
         self.stopped = False
     def start(self):
